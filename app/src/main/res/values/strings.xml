@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Activities</string>
     <string name="title_send">Отправить</string>
+    <string name="take_photo">Сделать фото</string>
+    <string name="select_photo">Выбрать фото</string>
+    <string name="access_camera_reason">Для получения снимка необходим доступ к камере</string>
+    <string name="give_access">Дать доступ</string>
+    <string name="deny_access">Отмена</string>
+    <string name="go_access_settings">Перейти к настройкам</string>
 </resources>
