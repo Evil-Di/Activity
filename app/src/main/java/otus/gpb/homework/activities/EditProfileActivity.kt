@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -23,12 +24,16 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var textViewName: TextView
     private lateinit var textViewSurName: TextView
     private lateinit var textViewNameAge: TextView
-    private lateinit var imageUri: Uri
+    private var imageUri: Uri = Uri.EMPTY
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
         imageView = findViewById(R.id.imageview_photo)
+        textViewName = findViewById(R.id.textview_name)
+        textViewSurName = findViewById(R.id.textview_surname)
+        textViewNameAge = findViewById(R.id.textview_age)
 
         findViewById<Toolbar>(R.id.toolbar).apply {
             inflateMenu(R.menu.menu)
@@ -49,9 +54,13 @@ class EditProfileActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<ImageView>(R.id.button4).apply {
+        findViewById<Button>(R.id.button4).apply {
             setOnClickListener {
-                fillForm.launch(Intent(context, FillFormActivity::class.java))
+                fillForm.launch(Intent(context, FillFormActivity::class.java)
+                    .putExtra(FillFormActivity.KEY_NAME, textViewName.text)
+                    .putExtra(FillFormActivity.KEY_SURNAME, textViewSurName.text)
+                    .putExtra(FillFormActivity.KEY_AGE, textViewNameAge.text)
+                )
             }
         }
     }
@@ -65,18 +74,25 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun openSenderApp() {
-        val intentTelegram = Intent(Intent.ACTION_SEND).apply {
-            type = "image/*"
-            setPackage("org.telegram.messenger")
-            if (imageUri != Uri.EMPTY) {
-                putExtra(Intent.EXTRA_STREAM, imageUri)
+        if (textViewName.text.toString().isNotBlank() ||
+            textViewSurName.text.toString().isNotBlank()) {
+
+            val intentTelegram = Intent(Intent.ACTION_SEND).apply {
+                type = "image/*"
+                setPackage("org.telegram.messenger")
+                if (imageUri != Uri.EMPTY) {
+                    putExtra(Intent.EXTRA_STREAM, imageUri)
+                }
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "${textViewName.text}\n${textViewSurName.text}\n${textViewNameAge.text}"
+                )
             }
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "${textViewName.text}\n${textViewSurName.text}\n${textViewNameAge.text}"
-            )
+            startActivity(intentTelegram)
         }
-        startActivity(intentTelegram)
+        else {
+            Toast.makeText(this, "Введите имя или фамилию", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun makeImage() {
@@ -151,10 +167,7 @@ class EditProfileActivity : AppCompatActivity() {
     private val takePicture = registerForActivityResult(ActivityResultContracts.GetContent()) {
         //image->imageView.setImageURI(image)
         uri->
-        if (uri == null) {
-            imageUri = Uri.EMPTY
-        }
-        else {
+        if (uri != null) {
             populateImage(uri)
             imageUri = uri
         }
@@ -167,9 +180,6 @@ class EditProfileActivity : AppCompatActivity() {
             textViewName.text = data.getStringExtra(FillFormActivity.KEY_NAME)
             textViewSurName.text = data.getStringExtra(FillFormActivity.KEY_SURNAME)
             textViewNameAge.text = data.getStringExtra(FillFormActivity.KEY_AGE)
-        }
-        else {
-            Toast.makeText(this, "Необходимо заполнить все поля", Toast.LENGTH_SHORT).show()
         }
     }
 }

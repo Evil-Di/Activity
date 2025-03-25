@@ -2,8 +2,8 @@ package otus.gpb.homework.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -26,19 +26,28 @@ class FillFormActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<ImageView>(R.id.buttonApply).apply {
-            setOnClickListener {
-                val name = findViewById<EditText>(R.id.editTextName).text.toString()
-                val surname = findViewById<EditText>(R.id.editTextSurname).text.toString()
-                val age = findViewById<EditText>(R.id.editTextAge).text.toString()
-                val result = if (name.isEmpty() || surname.isEmpty() || age.isEmpty())
-                    RESULT_CANCELED else RESULT_OK
+        val editTextName = findViewById<EditText>(R.id.editTextName)
+        val editTextSurname = findViewById<EditText>(R.id.editTextSurname)
+        val editTextAge = findViewById<EditText>(R.id.editTextAge)
 
-                val intent = Intent()
-                    .putExtra(KEY_NAME, name)
-                    .putExtra(KEY_SURNAME, surname)
-                    .putExtra(KEY_AGE, age)
-                setResult(result, intent)
+        if (intent.extras != null) {
+            editTextName.setText(intent.extras?.getString(KEY_NAME, ""))
+            editTextSurname.setText(intent.extras?.getString(KEY_SURNAME, ""))
+            editTextAge.setText(intent.extras?.getString(KEY_AGE, ""))
+        }
+
+        findViewById<Button>(R.id.buttonApply).apply {
+            setOnClickListener {
+                val name = editTextName.text.toString()
+                val surname = editTextSurname.text.toString()
+                val age = editTextAge.text.toString()
+
+                val intent = Intent().apply {
+                    putExtra(KEY_NAME, name)
+                    putExtra(KEY_SURNAME, surname)
+                    putExtra(KEY_AGE, age)
+                }
+                setResult(RESULT_OK, intent)
                 finish()
             }
         }
