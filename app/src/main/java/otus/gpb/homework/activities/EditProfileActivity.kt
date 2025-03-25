@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 class EditProfileActivity : AppCompatActivity() {
 
     private lateinit var imageView: ImageView
+    private lateinit var textViewName: TextView
+    private lateinit var textViewSurName: TextView
+    private lateinit var textViewNameAge: TextView
+    private lateinit var imageUri: Uri
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +48,12 @@ class EditProfileActivity : AppCompatActivity() {
                 makeImage()
             }
         }
+
+        findViewById<ImageView>(R.id.button4).apply {
+            setOnClickListener {
+                fillForm.launch(Intent(context, FillFormActivity::class.java))
+            }
+        }
     }
 
     /**
@@ -54,7 +65,18 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun openSenderApp() {
-        TODO("В качестве реализации метода отправьте неявный Intent чтобы поделиться профилем. В качестве extras передайте заполненные строки и картинку")
+        val intentTelegram = Intent(Intent.ACTION_SEND).apply {
+            type = "image/*"
+            setPackage("org.telegram.messenger")
+            if (imageUri != Uri.EMPTY) {
+                putExtra(Intent.EXTRA_STREAM, imageUri)
+            }
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "${textViewName.text}\n${textViewSurName.text}\n${textViewNameAge.text}"
+            )
+        }
+        startActivity(intentTelegram)
     }
 
     private fun makeImage() {
@@ -129,8 +151,25 @@ class EditProfileActivity : AppCompatActivity() {
     private val takePicture = registerForActivityResult(ActivityResultContracts.GetContent()) {
         //image->imageView.setImageURI(image)
         uri->
-        if (uri != null) {
+        if (uri == null) {
+            imageUri = Uri.EMPTY
+        }
+        else {
             populateImage(uri)
+            imageUri = uri
+        }
+    }
+
+    private val fillForm = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        result ->
+        val data = result.data
+        if (result.resultCode == RESULT_OK && data != null) {
+            textViewName.text = data.getStringExtra(FillFormActivity.KEY_NAME)
+            textViewSurName.text = data.getStringExtra(FillFormActivity.KEY_SURNAME)
+            textViewNameAge.text = data.getStringExtra(FillFormActivity.KEY_AGE)
+        }
+        else {
+            Toast.makeText(this, "Необходимо заполнить все поля", Toast.LENGTH_SHORT).show()
         }
     }
 }

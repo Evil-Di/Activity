@@ -7,4 +7,8 @@
     <string name="give_access">Дать доступ</string>
     <string name="deny_access">Отмена</string>
     <string name="go_access_settings">Перейти к настройкам</string>
+    <string name="input_name">Введите имя</string>
+    <string name="input_surname">Введите фамилию</string>
+    <string name="input_age">Введите возраст</string>
+    <string name="apply">Применить</string>
 </resources>
